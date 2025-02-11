@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres
+    container_name: postgres
+    volumes:
+      - ~/.pg/pg_data/flask-yt:/var/lib/postgresql/data
+    env_file:
+      - .env
+    ports:
+      - "54321:5432"
+  flask:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    container_name: flask
+    volumes:
+      - ~/.uploads/images/flask-yt:/app/app/static/upload
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=v1
+      - POSTGRES_PASSWORD=ptrip
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=mydb
+    depends_on:
+      - postgres
+    expose:
+      - 8080
+  nginx:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./nginx/
+    container_name: nginx
+    env_file:
+      - .env
+    depends_on:
+      - flask
+    ports:
+      - "8080:80"
